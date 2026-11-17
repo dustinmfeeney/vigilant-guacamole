@@ -32,22 +32,55 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     sys.exit(1)
 
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
-ACTIVE_MODEL = "gemini-3.8-flash"
-def generate_with_retry(contents, config):
-    for attempt in range(4):
-        try:
-            return ai_client.models.generate_content(
-                model=ACTIVE_MODEL,
-                contents=contents,
-                config=config
-            )
-        except Exception as e:
-            if ("503" in str(e) or "UNAVAILABLE" in str(e)) and attempt < 3:
-                time.sleep(2 * (attempt + 1))
-                continue
-            raise
+def load_live_models() -> list[str]:
+    try:
+        live = [
+            m.name.replace("models/", "")
+            for m in ai_client.models.list()
+            if "generateContent" in (m.supported_actions or [])
+            and "gemini" in m.name.lower()
+            and "embedding" not in m.name.lower()
+            and "image" not in m.name.lower()
+            and "tts" not in m.name.lower()
+        ]
+        prioritized = []
+        for top in ["gemini-3.8-flash", "gemini-3.8-pro", "gemini-3.5-flash", "gemini-3.5-pro", "gemini-3-flash-preview"]:
+            if top in live:
+                prioritized.append(top)
+        for m in live:
+            if m not in prioritized:
+                prioritized.append(m)
+        if prioritized:
+            print(f"Live Gemini models available: {prioritized}")
+            return prioritized
+    except Exception as err:
+        print(f"Model discovery warning: {err}")
+    return ["gemini-3.8-flash"]
 
-async def call_gemini_resilient(contents):
+LIVE_MODELS = load_live_models()
+ACTIVE_MODEL = LIVE_MODELS[0]
+
+def generate_with_retry(contents, config):
+    last_err = None
+    for model_name in LIVE_MODELS:
+        for attempt in range(2):
+            try:
+                return ai_client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                    config=config
+                )
+            except Exception as e:
+                last_err = e
+                err_str = str(e)
+                if "503" in err_str or "UNAVAILABLE" in err_str or "429" in err_str:
+                    time.sleep(1.5)
+                    continue
+                if "404" in err_str:
+                    break
+                raise
+    raise last_err
+
     last_err = None
     for model_name in MODEL_CHAIN:
         for attempt in range(2):
