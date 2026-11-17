@@ -1,4 +1,4 @@
-(Enter file contents here)import os
+import os
 import io
 import sys
 import time
