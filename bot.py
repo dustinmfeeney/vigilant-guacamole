@@ -553,8 +553,8 @@ async def fight(
             if img_bytes:
                 contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
 
-                print(f"Running /fight with {ACTIVE_MODEL}...")
-        response = await asyncio.wait_for(
+            print(f"Running /fight with {ACTIVE_MODEL}...")
+            response = await asyncio.wait_for(
             asyncio.to_thread(
                 ai_client.models.generate_content,
                 model=ACTIVE_MODEL,
