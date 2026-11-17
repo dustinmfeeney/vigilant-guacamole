@@ -32,7 +32,7 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     sys.exit(1)
 
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
-ACTIVE_MODEL = "gemini-3.8-flash", "gemini-3-flash-preview", "gemini-3.8-pro", "gemini-3.1-pro-preview"
+ACTIVE_MODEL = "gemini-3.8-flash"
 def generate_with_retry(contents, config):
     for attempt in range(4):
         try:
