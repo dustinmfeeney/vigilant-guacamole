@@ -564,7 +564,6 @@ async def fight(
             timeout=30.0
         )
 
-        )
 
         embeds, rec_toons, extra_file = format_discord_output(
             "MSF Tactical Battle Card",
@@ -603,11 +602,15 @@ Give a concise, easy-to-read verdict:
 2. **Where They Win (Nov 2026 Meta):** Exact modes/rooms where they matter vs. where they are outdated.
 3. **Exact Cost From Your Current Stats:** Gold, Training Mats, mandatory T4s/Awakened abilities (skipping luxury T4s), Gear Tier, and Iso-8 Class.
 """
-        response = await ai_client.aio.models.generate_content(
-            model=ACTIVE_MODEL,
-            contents=prompt,
-                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2, thinking_config=types.ThinkingConfig(thinking_budget=0))
-
+                print(f"Running /build for {character} with {ACTIVE_MODEL}...")
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                ai_client.models.generate_content,
+                model=ACTIVE_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+            ),
+            timeout=30.0
         )
 
         embeds, _, extra_file = format_discord_output(
