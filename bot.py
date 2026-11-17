@@ -90,7 +90,7 @@ def generate_with_retry(contents, config):
                     contents=contents,
                     config=config
                 )
-.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+
                     
                     
                 
