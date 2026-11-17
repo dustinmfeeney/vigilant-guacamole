@@ -31,7 +31,22 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     print("ERROR: Missing DISCORD_TOKEN or GEMINI_API_KEY in environment variables.")
     sys.exit(1)
 
-ai_client = genai.Client(api_key=GEMINI_API_KEY)
+ai_client = genai.Client(api_key=GEMINI_API_KEY, http_options=types.HttpOptions(api_version="v1beta"))
+
+def get_working_model() -> str:
+    try:
+        available = [m.name.replace("models/", "") for m in ai_client.models.list() if "generateContent" in (m.supported_actions or [])]
+        for preferred in ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"]:
+            if preferred in available:
+                return preferred
+        if available:
+            return available[0]
+    except Exception:
+        pass
+    return "gemini-2.5-flash"
+
+ACTIVE_MODEL = get_working_model()
+
 pending_oauth_states: dict[str, tuple[str, float]] = {}
 
 MASTER_ENGINE_PROMPT = """
@@ -450,7 +465,7 @@ async def connect(
             img_bytes = await defense_screenshot.read()
             if img_bytes:
                 vis = await ai_client.aio.models.generate_content(
-                    model="gemini-3-flash-preview",
+            model=ACTIVE_MODEL,
                     contents=[
                         "List ONLY the exact Marvel Strike Force character names visible in this Defense screenshot as a comma-separated list.",
                         types.Part.from_bytes(data=img_bytes, mime_type=defense_screenshot.content_type or "image/png")
@@ -551,7 +566,8 @@ async def fight(
                 contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
 
         response = await ai_client.aio.models.generate_content(
-            model="gemini-3-flash-preview",
+ model=ACTIVE_MODEL,
+
             contents=contents,
             config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
         )
@@ -594,7 +610,7 @@ Give a concise, easy-to-read verdict:
 3. **Exact Cost From Your Current Stats:** Gold, Training Mats, mandatory T4s/Awakened abilities (skipping luxury T4s), Gear Tier, and Iso-8 Class.
 """
         response = await ai_client.aio.models.generate_content(
-            model="gemini-3-flash-preview",
+            model=ACTIVE_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
         )
