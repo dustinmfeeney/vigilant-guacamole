@@ -44,7 +44,7 @@ def load_live_models() -> list[str]:
             and "tts" not in m.name.lower()
         ]
         prioritized = []
-                for top in ["gemini-4-hydrogen", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"]:
+        for top in ["gemini-4-hydrogen", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"]:
 
             if top in live:
                 prioritized.append(top)
