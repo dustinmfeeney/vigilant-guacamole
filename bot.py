@@ -32,7 +32,43 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     sys.exit(1)
 
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
-ACTIVE_MODEL = "gemini-3.8-flash"
+ACTIVE_MODEL_CHAIN = ["gemini-3.8-flash", "gemini-3-flash-preview", "gemini-3.8-pro", "gemini-3.1-pro-preview"]
+def generate_with_retry(contents, config):
+    for attempt in range(4):
+        try:
+            return ai_client.models.generate_content(
+                model=ACTIVE_MODEL,
+                contents=contents,
+                config=config
+            )
+        except Exception as e:
+            if ("503" in str(e) or "UNAVAILABLE" in str(e)) and attempt < 3:
+                time.sleep(2 * (attempt + 1))
+                continue
+            raise
+
+async def call_gemini_resilient(contents):
+    last_err = None
+    for model_name in MODEL_CHAIN:
+        for attempt in range(2):
+            try:
+                return await asyncio.wait_for(
+                    asyncio.to_thread(
+                        ai_client.models.generate_content,
+                        model=model_name,
+                        contents=contents,
+                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                    ),
+                    timeout=30.0
+                )
+            except Exception as exc:
+                last_err = exc
+                if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "429" in str(exc):
+                    await asyncio.sleep(1.5)
+                    continue
+                break
+    raise last_err
+
 
 
 
@@ -557,13 +593,13 @@ async def fight(
             print(f"Running /fight with {ACTIVE_MODEL}...")
             response = await asyncio.wait_for(
             asyncio.to_thread(
-                ai_client.models.generate_content,
-                model=ACTIVE_MODEL,
-                contents=contents,
-                config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                generate_with_retry,
+                contents,
+                types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
             ),
-            timeout=30.0
+            timeout=45.0
         )
+
 
 
         embeds, rec_toons, extra_file = format_discord_output(
