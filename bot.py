@@ -85,11 +85,11 @@ def generate_with_retry(contents, config):
     for model_name in MODEL_CHAIN:
         for attempt in range(2):
             try:
-                                return ai_client.models.generate_content(
+                return ai_client.models.generate_content(
                     model=model_name,
                     contents=contents,
                     config=config
-
+                )
 .GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
                     
                     
