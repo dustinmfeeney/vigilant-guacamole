@@ -602,7 +602,7 @@ Give a concise, easy-to-read verdict:
 2. **Where They Win (Nov 2026 Meta):** Exact modes/rooms where they matter vs. where they are outdated.
 3. **Exact Cost From Your Current Stats:** Gold, Training Mats, mandatory T4s/Awakened abilities (skipping luxury T4s), Gear Tier, and Iso-8 Class.
 """
-                print(f"Running /build for {character} with {ACTIVE_MODEL}...")
+print(f"Running /build for {character} with {ACTIVE_MODEL}...")
         response = await asyncio.wait_for(
             asyncio.to_thread(
                 ai_client.models.generate_content,
