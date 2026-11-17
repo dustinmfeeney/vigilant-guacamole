@@ -85,12 +85,12 @@ def generate_with_retry(contents, config):
     for model_name in MODEL_CHAIN:
         for attempt in range(2):
             try:
-                return await asyncio.wait_for(
-                    asyncio.to_thread(
-                        ai_client.models.generate_content,
-                        model=model_name,
-                        contents=contents,
-                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                                return ai_client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                    config=config
+                )
+.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
                     ),
                     timeout=30.0
                 )
