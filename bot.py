@@ -569,7 +569,8 @@ async def fight(
  model=ACTIVE_MODEL,
 
             contents=contents,
-            config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2, thinking_config=types.ThinkingConfig(thinking_budget=0))
+
         )
 
         embeds, rec_toons, extra_file = format_discord_output(
@@ -612,7 +613,8 @@ Give a concise, easy-to-read verdict:
         response = await ai_client.aio.models.generate_content(
             model=ACTIVE_MODEL,
             contents=prompt,
-            config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2, thinking_config=types.ThinkingConfig(thinking_budget=0))
+
         )
 
         embeds, _, extra_file = format_discord_output(
