@@ -89,11 +89,11 @@ def generate_with_retry(contents, config):
                     model=model_name,
                     contents=contents,
                     config=config
-                )
+
 .GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
                     ),
                     timeout=30.0
-                )
+                
             except Exception as exc:
                 last_err = exc
                 if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "429" in str(exc):
