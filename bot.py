@@ -31,21 +31,9 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     print("ERROR: Missing DISCORD_TOKEN or GEMINI_API_KEY in environment variables.")
     sys.exit(1)
 
-ai_client = genai.Client(api_key=GEMINI_API_KEY, http_options=types.HttpOptions(api_version="v1beta"))
+ai_client = genai.Client(api_key=GEMINI_API_KEY)
+ACTIVE_MODEL = "gemini-2.5-flash"
 
-def get_working_model() -> str:
-    try:
-        available = [m.name.replace("models/", "") for m in ai_client.models.list() if "generateContent" in (m.supported_actions or [])]
-        for preferred in ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"]:
-            if preferred in available:
-                return preferred
-        if available:
-            return available[0]
-    except Exception:
-        pass
-    return "gemini-2.5-flash"
-
-ACTIVE_MODEL = get_working_model()
 
 pending_oauth_states: dict[str, tuple[str, float]] = {}
 
@@ -565,11 +553,16 @@ async def fight(
             if img_bytes:
                 contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
 
-        response = await ai_client.aio.models.generate_content(
- model=ACTIVE_MODEL,
-
-            contents=contents,
-                        config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2, thinking_config=types.ThinkingConfig(thinking_budget=0))
+                print(f"Running /fight with {ACTIVE_MODEL}...")
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                ai_client.models.generate_content,
+                model=ACTIVE_MODEL,
+                contents=contents,
+                config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+            ),
+            timeout=30.0
+        )
 
         )
 
