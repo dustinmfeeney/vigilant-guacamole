@@ -551,7 +551,7 @@ async def fight(
                 contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
 
         response = await ai_client.aio.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model="gemini-3-flash-preview",
             contents=contents,
             config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
         )
@@ -594,7 +594,7 @@ Give a concise, easy-to-read verdict:
 3. **Exact Cost From Your Current Stats:** Gold, Training Mats, mandatory T4s/Awakened abilities (skipping luxury T4s), Gear Tier, and Iso-8 Class.
 """
         response = await ai_client.aio.models.generate_content(
-            model="gemini-3.1-pro-preview",
+            model="gemini-3-flash-preview",
             contents=prompt,
             config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
         )
