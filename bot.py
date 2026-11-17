@@ -32,7 +32,8 @@ if not DISCORD_TOKEN or not GEMINI_API_KEY:
     sys.exit(1)
 
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
-ACTIVE_MODEL = "gemini-2.5-flash"
+ACTIVE_MODEL = "gemini-3.8-flash"
+
 
 
 pending_oauth_states: dict[str, tuple[str, float]] = {}
