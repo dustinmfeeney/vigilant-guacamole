@@ -94,7 +94,7 @@ def generate_with_retry(contents, config):
                     
                     
                 
-            ept Exception as e:
+            except Exception as e:
                 last_err = exc
                 if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "429" in str(exc):
                     await asyncio.sleep(1.5)
