@@ -618,14 +618,14 @@ async def fight(
 ### PLAYER SYNCED ROSTER DATA:
 {roster_text}
 """
-        contents = [prompt]
+                contents = [prompt]
         if screenshot:
             img_bytes = await screenshot.read()
             if img_bytes:
                 contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
 
-            print(f"Running /fight with {ACTIVE_MODEL}...")
-            response = await asyncio.wait_for(
+        print(f"Running /fight with {ACTIVE_MODEL}...")
+        response = await asyncio.wait_for(
             asyncio.to_thread(
                 generate_with_retry,
                 contents,
@@ -633,8 +633,6 @@ async def fight(
             ),
             timeout=45.0
         )
-
-
 
         embeds, rec_toons, extra_file = format_discord_output(
             "MSF Tactical Battle Card",
@@ -676,12 +674,11 @@ Give a concise, easy-to-read verdict:
         print(f"Running /build for {character} with {ACTIVE_MODEL}...")
         response = await asyncio.wait_for(
             asyncio.to_thread(
-                ai_client.models.generate_content,
-                model=ACTIVE_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                generate_with_retry,
+                prompt,
+                types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
             ),
-            timeout=30.0
+            timeout=45.0
         )
 
         embeds, _, extra_file = format_discord_output(
@@ -703,5 +700,3 @@ Give a concise, easy-to-read verdict:
 
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)
-
-
