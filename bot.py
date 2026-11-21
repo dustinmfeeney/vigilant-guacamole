@@ -626,7 +626,7 @@ async def fight(
 ### PLAYER SYNCED ROSTER DATA:
 {roster_text}
 """
-                contents = [prompt]
+        contents = [prompt]
         if screenshot:
             img_bytes = await screenshot.read()
             if img_bytes:
