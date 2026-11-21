@@ -709,7 +709,8 @@ Give a concise, easy-to-read verdict:
 async def main():
     port = int(os.getenv("PORT", "8080"))
     app = web.Application()
-    app.router.add_get("/", bot.handle_health)
+    app.router.add_get("/", lambda req: web.Response(text="MSF Tactical Bot is online!"))
+
     app.router.add_get("/callback", bot.handle_oauth_callback)
     runner = web.AppRunner(app)
     await runner.setup()
