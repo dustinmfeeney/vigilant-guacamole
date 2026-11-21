@@ -437,19 +437,19 @@ class SmartMSFBot(commands.Bot):
             self.web_runner = web.AppRunner(app)
             await self.web_runner.setup()
             try:
-            site = web.TCPSite(self.web_runner, "0.0.0.0", PORT)
-            await site.start()
+                site = web.TCPSite(self.web_runner, "0.0.0.0", PORT)
+                await site.start()
             except OSError as err:
-            print(f"Warning: OAuth2 web listener skipped (port {PORT} unavailable: {err}).")
+                print(f"Warning: OAuth2 web listener skipped (port {PORT} unavailable: {err}).")
 
             if DISCORD_GUILD_ID:
-            guild = discord.Object(id=int(DISCORD_GUILD_ID))
-            self.tree.copy_global_to(guild=guild)
-            await self.tree.sync(guild=guild)
+                guild = discord.Object(id=int(DISCORD_GUILD_ID))
+                self.tree.copy_global_to(guild=guild)
+                await self.tree.sync(guild=guild)
             else:
-            await self.tree.sync()
+                await self.tree.sync()
 
-        async def on_ready(self):
+    async def on_ready(self):
             await self.change_presence(
                 status=discord.Status.online,
                 activity=discord.Game(name="/fight | MSF War & Crucible")
