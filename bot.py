@@ -427,34 +427,34 @@ class SmartMSFBot(commands.Bot):
         return web.Response(text="Failed to complete MSF.gg authorization. Try /connect again.", status=500)
 
         async def handle_health(self, request: web.Request):
-        return web.Response(text="MSF Tactical Bot is online and awake!")
+            return web.Response(text="MSF Tactical Bot is online and awake!")
 
-    async def setup_hook(self):
-        init_db()
-        app = web.Application()
-        app.router.add_get("/", self.handle_health)
-        app.router.add_get("/callback", self.handle_oauth_callback)
-        self.web_runner = web.AppRunner(app)
-        await self.web_runner.setup()
-        try:
+        async def setup_hook(self):
+            init_db()
+            app = web.Application()
+            app.router.add_get("/", self.handle_health)
+            app.router.add_get("/callback", self.handle_oauth_callback)
+            self.web_runner = web.AppRunner(app)
+            await self.web_runner.setup()
+            try:
             site = web.TCPSite(self.web_runner, "0.0.0.0", PORT)
             await site.start()
-        except OSError as err:
+            except OSError as err:
             print(f"Warning: OAuth2 web listener skipped (port {PORT} unavailable: {err}).")
 
-        if DISCORD_GUILD_ID:
+            if DISCORD_GUILD_ID:
             guild = discord.Object(id=int(DISCORD_GUILD_ID))
             self.tree.copy_global_to(guild=guild)
             await self.tree.sync(guild=guild)
-        else:
+            else:
             await self.tree.sync()
 
-    async def on_ready(self):
-        await self.change_presence(
-            status=discord.Status.online,
-            activity=discord.Game(name="/fight | MSF War & Crucible")
-        )
-        print(f"MSF Tactical Bot online as {self.user} (ID: {self.user.id})")
+        async def on_ready(self):
+            await self.change_presence(
+                status=discord.Status.online,
+                activity=discord.Game(name="/fight | MSF War & Crucible")
+            )
+            print(f"MSF Tactical Bot online as {self.user} (ID: {self.user.id})")
 
     async def close(self):
         if self.web_runner:
