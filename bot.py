@@ -706,5 +706,18 @@ Give a concise, easy-to-read verdict:
         if extra_file:
             extra_file.close()
 
+async def main():
+    port = int(os.getenv("PORT", "8080"))
+    app = web.Application()
+    app.router.add_get("/", bot.handle_health)
+    app.router.add_get("/callback", bot.handle_oauth_callback)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"Web server listening immediately on 0.0.0.0:{port}")
+    async with bot:
+        await bot.start(DISCORD_TOKEN)
+
 if __name__ == "__main__":
-    bot.run(DISCORD_TOKEN)
+    asyncio.run(main())
