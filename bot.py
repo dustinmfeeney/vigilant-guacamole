@@ -626,21 +626,34 @@ async def fight(
 ### PLAYER SYNCED ROSTER DATA:
 {roster_text}
 """
-        contents = [prompt]
+                contents = [prompt]
         if screenshot:
             img_bytes = await screenshot.read()
             if img_bytes:
-                contents.append(types.Part.from_bytes(data=img_bytes, mime_type=screenshot.content_type or "image/png"))
+                try:
+                    from PIL import Image
+                    im = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+                    if im.width > 1280:
+                        new_h = int(im.height * (1280 / im.width))
+                        im = im.resize((1280, new_h), Image.Resampling.LANCZOS)
+                    buf = io.BytesIO()
+                    im.save(buf, format="JPEG", quality=82, optimize=True)
+                    img_bytes = buf.getvalue()
+                    mime = "image/jpeg"
+                except Exception:
+                    mime = screenshot.content_type or "image/png"
+                contents.append(types.Part.from_bytes(data=img_bytes, mime_type=mime))
 
-        print(f"Running /fight with {ACTIVE_MODEL}...")
+        print(f"Running /fight with {ACTIVE_MODEL} ({len(img_bytes) if screenshot else 0} bytes)...")
         response = await asyncio.wait_for(
             asyncio.to_thread(
                 generate_with_retry,
                 contents,
-                types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2)
+                types.GenerateContentConfig(system_instruction=MASTER_ENGINE_PROMPT, temperature=0.2),
             ),
-            timeout=45.0
+            timeout=85.0
         )
+
 
         embeds, rec_toons, extra_file = format_discord_output(
             "MSF Tactical Battle Card",
