@@ -707,6 +707,7 @@ Give a concise, easy-to-read verdict:
             extra_file.close()
 
 async def main():
+        init_db()
     port = int(os.getenv("PORT", "8080"))
     app = web.Application()
     app.router.add_get("/", lambda req: web.Response(text="MSF Tactical Bot is online!"))
